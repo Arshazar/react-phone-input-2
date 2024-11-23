@@ -8,6 +8,7 @@ import classNames from 'classnames';
 import './utils/prototypes'
 
 import CountryData from './CountryData.js';
+import { utils } from './utils/utils.js';
 
 class PhoneInput extends React.Component {
   static propTypes = {
@@ -70,6 +71,7 @@ class PhoneInput extends React.Component {
 
     inputProps: PropTypes.object,
     localization: PropTypes.object,
+    digitLang: PropTypes.string,
     masks: PropTypes.object,
     areaCodes: PropTypes.object,
 
@@ -145,6 +147,7 @@ class PhoneInput extends React.Component {
 
     inputProps: {},
     localization: {},
+    digitLang: 'en',
 
     masks: null,
     priority: null,
@@ -237,7 +240,10 @@ class PhoneInput extends React.Component {
       document.addEventListener('mousedown', this.handleClickOutside);
     }
     if(this.props.onMount){
-        this.props.onMount(this.state.formattedNumber.replace(/[^0-9]+/g,''), this.getCountryData(), this.state.formattedNumber)
+      this.props.onMount(this.state.formattedNumber.replace(/[^0-9]+/g,''), this.getCountryData(), this.state.formattedNumber)
+    }
+    if(this.props.digitLang === 'per') {
+      this.setState({ placeholder: utils.toPersianDigits(this.props.placeholder) })
     }
   }
 
@@ -337,6 +343,7 @@ class PhoneInput extends React.Component {
     // if new value start with selectedCountry.dialCode, format number, otherwise find newSelectedCountry
     if (selectedCountry && startsWith(value, prefix + selectedCountry.dialCode)) {
       formattedNumber = this.formatNumber(inputNumber, selectedCountry);
+
       this.setState({ formattedNumber });
     }
     else {
@@ -350,6 +357,7 @@ class PhoneInput extends React.Component {
         (this.props.disableCountryCode ? '' : dialCode) + inputNumber,
         newSelectedCountry ? (newSelectedCountry) : undefined
       );
+
       this.setState({ selectedCountry: newSelectedCountry, formattedNumber });
     }
   }
@@ -402,7 +410,7 @@ class PhoneInput extends React.Component {
     if (!country) return text;
 
     const { format } = country;
-    const { disableCountryCode, enableAreaCodeStretch, enableLongNumbers, autoFormat } = this.props;
+    const { disableCountryCode, enableAreaCodeStretch, enableLongNumbers, autoFormat, digitLang } = this.props;
 
     let pattern;
     if (disableCountryCode) {
@@ -423,10 +431,9 @@ class PhoneInput extends React.Component {
       return disableCountryCode ? '' : this.props.prefix;
     }
 
-    // for all strings with length less than 3, just return it (1, 2 etc.)
-    // also return the same text if the selected country has no fixed format
     if ((text && text.length < 2) || !pattern || !autoFormat) {
-      return disableCountryCode ? text : this.props.prefix+text;
+      const baseNumber = disableCountryCode ? text : this.props.prefix + text;
+      return digitLang === 'per' ? utils.toPersianDigits(baseNumber) : baseNumber;
     }
 
     const formattedObject = reduce(pattern, (acc, character) => {
@@ -459,9 +466,9 @@ class PhoneInput extends React.Component {
       formattedNumber = formattedObject.formattedText;
     }
 
-    // Always close brackets
     if (formattedNumber.includes('(') && !formattedNumber.includes(')')) formattedNumber += ')';
-    return formattedNumber;
+
+    return digitLang === 'per' ? utils.toPersianDigits(formattedNumber) : formattedNumber;
   }
 
   // Put the cursor to the end of the input (usually after a focus event)
@@ -512,7 +519,7 @@ class PhoneInput extends React.Component {
 
   handleInput = (e) => {
     const { value } = e.target;
-    const { prefix, onChange } = this.props;
+    const { prefix, onChange, digitLang } = this.props;
 
     let formattedNumber = this.props.disableCountryCode ? '' : prefix;
     let newSelectedCountry = this.state.selectedCountry;
@@ -528,12 +535,10 @@ class PhoneInput extends React.Component {
     }
 
     if (value === prefix) {
-      // we should handle change when we delete the last digit
       if (onChange) onChange('', this.getCountryData(), e, '');
       return this.setState({ formattedNumber: '' });
     }
 
-    // Does exceed default 15 digit phone number limit
     if (value.replace(/\D/g, '').length > 15) {
       if (this.props.enableLongNumbers === false) return;
       if (typeof this.props.enableLongNumbers === 'number') {
@@ -541,36 +546,39 @@ class PhoneInput extends React.Component {
       }
     }
 
-    // if the input is the same as before, must be some special key like enter etc.
     if (value === this.state.formattedNumber) return;
 
-    // ie hack
     if (e.preventDefault) {
       e.preventDefault();
     } else {
       e.returnValue = false;
     }
 
-    const { country } = this.props
-    const { onlyCountries, selectedCountry, hiddenAreaCodes } = this.state
+    const { country } = this.props;
+    const { onlyCountries, selectedCountry, hiddenAreaCodes } = this.state;
 
     if (onChange) e.persist();
 
     if (value.length > 0) {
-      // before entering the number in new format, lets check if the dial code now matches some other country
-      const inputNumber = value.replace(/\D/g, '');
+      // Convert Persian digits to English before processing
+      const normalizedValue = utils.toEnglishDigits(value);
+      const inputNumber = normalizedValue.replace(/\D/g, '');
 
-      // we don't need to send the whole number to guess the country... only the first 6 characters are enough
-      // the guess country function can then use memoization much more effectively since the set of input it
-      // gets has drastically reduced
-      if (!this.state.freezeSelection || (!!selectedCountry && selectedCountry.dialCode.length > inputNumber.length)) {
-        if (this.props.disableCountryGuess) {newSelectedCountry = selectedCountry;}
-        else {
+      if (!this.state.freezeSelection || (selectedCountry && selectedCountry.dialCode.length > inputNumber.length)) {
+        if (this.props.disableCountryGuess) {
+          newSelectedCountry = selectedCountry;
+        } else {
           newSelectedCountry = this.guessSelectedCountry(inputNumber.substring(0, 6), country, onlyCountries, hiddenAreaCodes) || selectedCountry;
         }
         freezeSelection = false;
       }
       formattedNumber = this.formatNumber(inputNumber, newSelectedCountry);
+      
+      // Convert to Persian digits if needed
+      if (digitLang === 'per') {
+        formattedNumber = utils.toPersianDigits(formattedNumber);
+      }
+
       newSelectedCountry = newSelectedCountry.dialCode ? newSelectedCountry : selectedCountry;
     }
 
@@ -598,7 +606,9 @@ class PhoneInput extends React.Component {
         this.numberInputRef.setSelectionRange(oldCaretPosition, oldCaretPosition);
       }
 
-      if (onChange) onChange(formattedNumber.replace(/[^0-9]+/g,''), this.getCountryData(), e, formattedNumber);
+      // Always convert to English digits for the onChange callback
+      const englishDigits = utils.toEnglishDigits(formattedNumber);
+      if (onChange) onChange(englishDigits.replace(/[^0-9]+/g,''), this.getCountryData(), e, formattedNumber);
     });
   }
 
@@ -650,7 +660,10 @@ class PhoneInput extends React.Component {
   }
 
   handleInputBlur = (e) => {
-    if (!e.target.value) this.setState({ placeholder: this.props.placeholder });
+    if (!e.target.value) {
+      const modifiedPlaceholder = this.props.digitLang === 'per' ? utils.toPersianDigits(this.props.placeholder) : this.props.placeholder;
+      this.setState({ placeholder: modifiedPlaceholder })
+    }
     this.props.onBlur && this.props.onBlur(e, this.getCountryData());
   }
 
@@ -969,7 +982,7 @@ class PhoneInput extends React.Component {
           onCopy={this.handleInputCopy}
           value={formattedNumber}
           onKeyDown={this.handleInputKeyDown}
-          placeholder={this.props.placeholder}
+          placeholder={this.state.placeholder}
           disabled={this.props.disabled}
           type='tel'
           {...this.props.inputProps}

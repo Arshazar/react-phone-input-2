@@ -1,0 +1,7 @@
+node_modules
+test
+.travis.yml
+package-lock.json
+.gitignore
+.git
+.idea

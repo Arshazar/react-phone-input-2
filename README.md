@@ -1,22 +1,22 @@
-# React-Phone-Input-2
-Highly customizable phone input component with auto formatting.
+# @arshazar/react-phone-input-2
+Highly customizable phone input component with auto formatting (Persian digits support included).
 
-[![npm version](https://img.shields.io/npm/v/react-phone-input-2.svg?style=flat)](https://www.npmjs.com/package/react-phone-input-2)
-[![npm downloads](https://img.shields.io/npm/dm/react-phone-input-2.svg?style=flat)](https://www.npmjs.com/package/react-phone-input-2)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/bl00mber/react-phone-input-2#contributing)
-[![travis build](https://travis-ci.org/bl00mber/react-phone-input-2.svg?branch=master)](https://travis-ci.org/bl00mber/react-phone-input-2)
+[![npm version](https://img.shields.io/npm/v/@arshazar/react-phone-input-2.svg?style=flat)](https://www.npmjs.com/package/@arshazar/react-phone-input-2)
+[![npm downloads](https://img.shields.io/npm/dm/@arshazar/react-phone-input-2.svg?style=flat)](https://www.npmjs.com/package/@arshazar/react-phone-input-2)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/arshazar/react-phone-input-2#contributing)
+<!-- [![travis build](https://travis-ci.org/bl00mber/react-phone-input-2.svg?branch=master)](https://travis-ci.org/bl00mber/@arshazar/react-phone-input-2) -->
 
 ![animation](https://media.giphy.com/media/xiORAWnqoTJDsH0UOI/giphy.gif)
 
 ## Installation
 ```shell-script
-npm install react-phone-input-2 --save
+npm i @arshazar/react-phone-input-2
 ```
 
 ## Usage
 ```jsx
-import PhoneInput from 'react-phone-input-2'
-import 'react-phone-input-2/lib/style.css'
+import PhoneInput from '@arshazar/react-phone-input-2'
+import '@arshazar/react-phone-input-2/lib/style.css'
 
 <PhoneInput
   country={'us'}
@@ -26,9 +26,9 @@ import 'react-phone-input-2/lib/style.css'
 ```
 **available styles** - style • high-res • material • bootstrap • semantic-ui • plain
 
-#### [Demo 1 (UI)](https://bl00mber.github.io/react-phone-input-2.html) - [Demo 2 (CSS)](https://bl00mber.github.io/react-phone-input-2-css.html)
+#### [Demo 1 (UI)](https://arshazar.github.io/@arshazar/react-phone-input-2.html) - [Demo 2 (CSS)](https://arshazar.github.io/@arshazar/react-phone-input-2-css.html)
 
-![screenshot](https://raw.githubusercontent.com/bl00mber/react-phone-input-2/master/test/screenshot.png)
+![screenshot](https://raw.githubusercontent.com/arshazar/react-phone-input-2/master/test/screenshot.png)
 
 ## Options
 <table>
@@ -67,6 +67,12 @@ import 'react-phone-input-2/lib/style.css'
     <td> array </td>
     <td> array of country codes to be excluded </td>
     <td> ['cu','cw','kz'] </td>
+  </tr>
+  <tr>
+    <td> digitLang </td>
+    <td> string </td>
+    <td> can have other digits. e.g. Persian </td>
+    <td> 'per' </td>
   </tr>
 
   <tr>
@@ -421,6 +427,21 @@ Example: `+61 (2), +61 (02)`
 />
 ```
 
+### Custom digit language
+```jsx
+import es from '@arshazar/react-phone-input-2/lang/ir.json'
+
+<PhoneInput
+  digitLang="per" // for Persian
+  localization={ir}
+/>
+
+<PhoneInput
+  onlyCountries={['de', 'es']}
+  localization={{'Germany': 'Deutschland', 'Spain': 'España'}}
+/>
+```
+
 ### Preserve countries order
 ```jsx
 <PhoneInput
@@ -496,7 +517,7 @@ const placeholder = useMemo(() => {
 
 ### CDN
 ```html
-<script src="https://unpkg.com/react-phone-input-2@2.x/dist/lib.js"></script>
+<script src="https://unpkg.com/@arshazar/react-phone-input-2@1.x/dist/lib.js"></script>
 ```
 
 ## Contributing
@@ -505,8 +526,8 @@ const placeholder = useMemo(() => {
 - Do not send new languages
 
 ## License
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/bl00mber/react-phone-input-2/blob/master/LICENSE)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/arshazar/react-phone-input-2/blob/master/LICENSE)
 
-Based on [react-phone-input](https://github.com/razagill/react-phone-input)
+Based on [react-phone-input-2](https://github.com/arshazar/react-phone-input-2)
 
-Make sure you donated for lib maintenance [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/bloomber/20)
+<!-- Make sure you donated for lib maintenance [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/bloomber/20) -->
